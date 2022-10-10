@@ -1,0 +1,38 @@
+---
+image:
+  repository: onaio/fluent-bit
+  tag: "1.9.3-hardened"
+
+config:
+  ## https://docs.fluentbit.io/manual/pipeline/inputs
+  inputs: |
+    [INPUT]
+        Name  tail
+        Path  /var/log/containers/*.log
+        multiline.parser  docker, cri
+
+    [INPUT]
+        Name  cpu
+        Tag   cpu
+
+  ## https://docs.fluentbit.io/manual/pipeline/filters
+  # filters: |
+  #   [FILTER]
+  #       Name k8s
+  #       Match *
+  #       Tag k8s
+  
+  ## https://docs.fluentbit.io/manual/pipeline/outputs
+  outputs: |
+    [OUTPUT]
+        Name            es
+        Match           *
+        Host            elasticsearch
+        Port            9200       
+        Generate_ID     On      
+        Logstash_Format On
+        Logstash_Prefix fluent-bit-temp
+        Retry_Limit     False
+        Replace_Dots    On
+## how to deploy
+# helm upgrade -n kube-logging -f fluentbit.yaml fluent-bit fluent/fluent-bit
